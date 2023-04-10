@@ -15,6 +15,6 @@ jobs:
       - name: configure
         run: sudo apt install build-essential flex bison make
       - name: install kernel headers
-        run: sudo apt install linux-headers-$(uname-r) linux-modules-$(uname -r)
+        run: sudo apt install linux-headers-$(uname -r) linux-modules-$(uname -r)
       - name: make
         run: KERN_DIR=/lib/modules/$(uname -r)/build  make
