@@ -574,16 +574,10 @@ static int suniv_i2c_probe(struct platform_device *pdev)
         pr_debug("%s, i2c reg base: %p\n", __func__, i2c_dev->base);
 
         /* get clocks */
-        i2c_dev->hclk = devm_clk_get(&pdev->dev, "ahb");
+        i2c_dev->hclk = devm_clk_get(&pdev->dev, NULL);
         if (IS_ERR(i2c_dev->hclk)) {
                 dev_err(&pdev->dev, "Unable to acquire AHB clock\n");
                 return PTR_ERR(i2c_dev->hclk);
-        }
-
-        i2c_dev->mclk = devm_clk_get(&pdev->dev, "mod");
-        if (IS_ERR(i2c_dev->mclk)) {
-                dev_err(&pdev->dev, "Unable to acquire module clock\n");
-                return PTR_ERR(i2c_dev->mclk);
         }
 
         i2c_dev->rstc = devm_reset_control_get_exclusive(&pdev->dev, NULL);
@@ -621,12 +615,6 @@ static int suniv_i2c_probe(struct platform_device *pdev)
         rc = clk_prepare_enable(i2c_dev->hclk);
         if (rc) {
                 dev_err(&pdev->dev, "can't enable AHB clock!\n");
-                return rc;
-        }
-
-        rc = clk_prepare_enable(i2c_dev->mclk);
-        if (rc) {
-                dev_err(&pdev->dev, "can't enable module clock!\n");
                 return rc;
         }
 
@@ -696,7 +684,6 @@ static int suniv_i2c_remove(struct platform_device *pdev)
 
         reset_control_deassert(i2c_dev->rstc);
         clk_disable_unprepare(i2c_dev->hclk);
-        clk_disable_unprepare(i2c_dev->mclk);
 
         return 0;
 }
@@ -705,7 +692,6 @@ static int __maybe_unused suniv_i2c_runtime_suspend(struct device *dev)
 {
         struct suniv_i2c *i2c_dev = dev_get_drvdata(dev);
 
-        clk_disable_unprepare(i2c_dev->mclk);
         clk_disable_unprepare(i2c_dev->hclk);
 
         /* TODO: select gpio pinctrl function */
@@ -717,10 +703,6 @@ static int __maybe_unused suniv_i2c_runtime_resume(struct device *dev)
 {
         struct suniv_i2c *i2c_dev = dev_get_drvdata(dev);
         int rc;
-
-        rc = clk_prepare_enable(i2c_dev->mclk);
-        if (rc)
-                return rc;
 
         rc = clk_prepare_enable(i2c_dev->hclk);
         if (rc)
@@ -766,6 +748,6 @@ static struct platform_driver suniv_i2c_driver = {
 module_platform_driver(suniv_i2c_driver);
 
 MODULE_AUTHOR("Mark A. Greer <mgreer@mvista.com>");
-MODULE_AUTHOR("IotaHydrae <writeforever@foxmail.com>");
+MODULE_AUTHOR("embeddedboys <writeforever@foxmail.com>");
 MODULE_DESCRIPTION("Allwinner suniv SoC family host bridge i2c adapter driver");
 MODULE_LICENSE("GPL");

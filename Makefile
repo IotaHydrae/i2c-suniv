@@ -4,6 +4,7 @@
 
 # users kernel dir
 KERN_DIR ?= /home/developer/sources/HamsterBear/software/bsp/linux-5.17.2
+KERN_DIR := /home/developer/sources/ninjar/linux
 
 MODULE_NAME := i2c-suniv
 
